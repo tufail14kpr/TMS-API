@@ -86,9 +86,13 @@ exports.getAllBlogs = async (req, res) => {
 exports.getBlogBySlug = async (req, res) => {
   try {
     const blog = await Blog.findOne({ slug: req.params.slug });
-    if (!blog) return res.status(404).json({ message: 'Blog not found' });
-    res.json(blog);
+    if (!blog) {
+      // Render an error page or redirect instead of sending JSON
+      return res.status(404).render('error', { message: 'Blog not found' });
+    }
+    res.render('blog', { blog });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).render('error', { message: 'Internal Server Error' });
   }
 };

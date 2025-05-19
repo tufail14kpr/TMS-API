@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TMS Blog - <%= blog.title %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    /* Navbar Styles */
+    .navbar {
+      background-color: #333;
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .navbar ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+    }
+    .navbar li {
+      margin: 0 1rem;
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .navbar a:hover {
+      color: #ddd;
+    }
+    /* Blog Content Styles */
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .blog-post {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+    }
+    .blog-post h1 {
+      margin-top: 0;
+      color: #333;
+    }
+    .meta {
+      color: #777;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .content {
+      color: #555;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+    .media {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .media img, .media video {
+      max-width: 300px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <ul>
+      <li><a href="/home">Home</a></li>
+      <li><a href="/create">Create Blog</a></li>
+      <li><a href="/api-docs">API Docs</a></li>
+    </ul>
+  </nav>
+
+  <!-- Blog Content -->
+  <div class="container">
+    <div class="blog-post">
+      <h1><%= blog.title %></h1>
+      <div class="meta">
+        <span>By <%= blog.author || 'Anonymous' %></span> | 
+        <span><%= new Date(blog.createdAt).toLocaleDateString() %></span>
+      </div>
+      <div class="content">
+        <p><%= blog.content %></p>
+      </div>
+      <% if (blog.media && blog.media.length > 0) { %>
+        <div class="media">
+          <% blog.media.forEach(item => { %>
+            <% if (item.resource_type === 'image') { %>
+              <img src="<%= item.url %>" alt="Blog Media">
+            <% } else if (item.resource_type === 'video') { %>
+              <video controls src="<%= item.url %>" style="max-width: 300px;"></video>
+            <% } %>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,36 +1,25 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const blogRoutes = require('./routes/blogRoutes');
+const viewRoutes = require('./routes/viewRoutes'); // Import the new view routes
 const cors = require('cors');
 require('dotenv').config();
 
 // Swagger setup
 const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
+const fs = require('fs');
+const YAML = require('yaml');
+
+// Load the Swagger YAML file
+const swaggerFile = fs.readFileSync('./config/swagger.yaml', 'utf8');
+const swaggerDocument = YAML.parse(swaggerFile);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Swagger configuration
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'TMS API',
-      version: '1.0.0',
-      description: 'API documentation for the TMS Blog application',
-    },
-    servers: [
-      {
-        url: `http://localhost:${PORT}`,
-        description: 'Development server',
-      },
-    ],
-  },
-  apis: ['./routes/*.js'], // Path to the API docs (JSDoc comments in route files)
-};
-
-const swaggerSpecs = swaggerJsdoc(swaggerOptions);
+// Set up EJS as the view engine
+app.set('view engine', 'ejs');
+app.set('views', './views');
 
 // Middleware
 app.use(cors());
@@ -38,7 +27,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve Swagger UI at /api-docs
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Connect to MongoDB
 mongoose.connect(
@@ -52,7 +41,10 @@ app.get('/', (req, res) => {
   res.send('API is running!');
 });
 
-// Blog routes
+// Mount view routes
+app.use('/', viewRoutes);
+
+// Blog API routes
 app.use('/api/blogs', blogRoutes);
 
 // 404 handler for unmatched routes
@@ -69,4 +61,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`Swagger UI available at http://localhost:${PORT}/api-docs`);
+  console.log(`Homepage available at http://localhost:${PORT}/home`);
 });
