@@ -1,14 +1,12 @@
-const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('./cloudinary');
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: async (req, file) => ({
-    folder: 'blogs',
-    resource_type: file.mimetype.startsWith('video/') ? 'video' : 'image',
-    public_id: Date.now() + '-' + file.originalname.split('.')[0]
-  })
+  params: {
+    folder: 'tms-blog-media', // Store media in a folder named 'tms-blog-media'
+    allowed_formats: ['jpg', 'jpeg', 'png', 'mp4', 'mov'], // Allow images and videos
+  },
 });
 
-module.exports = multer({ storage: storage });
+module.exports = storage;

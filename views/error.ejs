@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TMS Blog - Error</title>
+  <link rel="stylesheet" href="/css/output.css">
+</head>
+<body class="font-sans bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen flex flex-col">
+  <!-- Navbar -->
+  <nav class="bg-gradient-to-r from-primary to-purple-600 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex-shrink-0">
+          <a href="/home" class="text-2xl font-bold text-white tracking-tight">TMS Blog</a>
+        </div>
+        <div class="flex space-x-2 sm:space-x-4">
+          <a href="/home" class="text-white hover:bg-primary/80 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Home</a>
+          <a href="/create" class="text-white hover:bg-primary/80 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Create Blog</a>
+          <a href="/api-docs" class="text-white hover:bg-primary/80 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">API Docs</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Error Message -->
+  <div class="flex-grow flex items-center justify-center py-12">
+    <div class="max-w-md mx-auto p-6 sm:p-8 bg-white rounded-xl shadow-md text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold text-red-500 mb-4">Oops!</h1>
+      <p class="text-gray-600 text-lg sm:text-xl mb-6"><%= message %></p>
+      <a href="/home" class="inline-block bg-primary text-white px-6 py-3 rounded-lg shadow-md hover:bg-primary/80 transition-colors duration-200">Back to Home</a>
+    </div>
+  </div>
+</body>
+</html>

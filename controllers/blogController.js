@@ -1,98 +1,130 @@
 const Blog = require('../models/Blog');
 const cloudinary = require('../config/cloudinary');
 
-// CREATE Blog with image/video upload
-exports.createBlog = async (req, res) => {
-  try {
-    const { title, slug, content, author } = req.body;
-    let media = [];
-    if (req.files) {
-      media = req.files.map(file => ({
-        url: file.path,
-        public_id: file.filename,
-        resource_type: file.mimetype.startsWith('video/') ? 'video' : 'image'
-      }));
-    }
-    const blog = new Blog({ title, slug, content, author, media });
-    await blog.save();
-    res.status(201).json(blog);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+// Helper function to generate a slug from the title
+const generateSlug = (title) => {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric characters with hyphens
+    .replace(/(^-|-$)/g, ''); // Remove leading/trailing hyphens
 };
 
-// UPDATE Blog and (optionally) replace media
-exports.updateBlog = async (req, res) => {
-  try {
-    const { slug } = req.params;
-    const { title, content, author } = req.body;
-    const blog = await Blog.findOne({ slug });
-    if (!blog) return res.status(404).json({ message: 'Blog not found' });
-
-    // If new files uploaded, delete old media from Cloudinary
-    if (req.files && req.files.length) {
-      // Delete previous media
-      for (const item of blog.media) {
-        await cloudinary.uploader.destroy(item.public_id, { resource_type: item.resource_type });
-      }
-      // Set new media
-      blog.media = req.files.map(file => ({
-        url: file.path,
-        public_id: file.filename,
-        resource_type: file.mimetype.startsWith('video/') ? 'video' : 'image'
-      }));
-    }
-
-    // Update fields
-    if (title) blog.title = title;
-    if (content) blog.content = content;
-    if (author) blog.author = author;
-    await blog.save();
-    res.json(blog);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
-
-// DELETE Blog and remove media from Cloudinary
-exports.deleteBlog = async (req, res) => {
-  try {
-    const { slug } = req.params;
-    const blog = await Blog.findOneAndDelete({ slug });
-    if (!blog) return res.status(404).json({ message: 'Blog not found' });
-
-    // Delete media from Cloudinary
-    for (const item of blog.media) {
-      await cloudinary.uploader.destroy(item.public_id, { resource_type: item.resource_type });
-    }
-
-    res.json({ message: 'Blog and media deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// GET all blogs
+// Get all blogs
 exports.getAllBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find().sort({ createdAt: -1 });
-    res.json(blogs);
+    res.status(200).json(blogs);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// GET single blog by slug
+// Get blog by slug
 exports.getBlogBySlug = async (req, res) => {
   try {
     const blog = await Blog.findOne({ slug: req.params.slug });
     if (!blog) {
-      // Render an error page or redirect instead of sending JSON
-      return res.status(404).render('error', { message: 'Blog not found' });
+      return res.status(404).json({ error: 'Blog not found' });
     }
-    res.render('blog', { blog });
+    res.status(200).json(blog);
   } catch (err) {
-    console.error(err);
-    res.status(500).render('error', { message: 'Internal Server Error' });
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Create a new blog
+exports.createBlog = async (req, res) => {
+  try {
+    const { title, author, content } = req.body;
+
+    // Generate slug from title
+    let slug = generateSlug(title);
+    const existingBlog = await Blog.findOne({ slug });
+    if (existingBlog) {
+      const timestamp = Date.now();
+      slug = `${slug}-${timestamp}`;
+    }
+
+    // Process uploaded media
+    const media = req.files ? req.files.map(file => ({
+      url: file.path, // Cloudinary URL
+      public_id: file.filename, // Cloudinary public ID
+      resource_type: file.mimetype.startsWith('video/') ? 'video' : 'image',
+    })) : [];
+
+    const newBlog = new Blog({
+      title,
+      slug,
+      author: author || 'Anonymous',
+      content,
+      media,
+    });
+
+    await newBlog.save();
+    res.status(201).json(newBlog);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update a blog
+exports.updateBlog = async (req, res) => {
+  try {
+    const { title, author, content } = req.body;
+    const blog = await Blog.findOne({ slug: req.params.slug });
+
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+
+    // Update fields
+    if (title) {
+      blog.title = title;
+      blog.slug = generateSlug(title);
+    }
+    if (author) blog.author = author;
+    if (content) blog.content = content;
+
+    // Delete old media from Cloudinary if new media is uploaded
+    if (req.files && req.files.length > 0) {
+      if (blog.media && blog.media.length > 0) {
+        for (const item of blog.media) {
+          await cloudinary.uploader.destroy(item.public_id);
+        }
+      }
+      blog.media = req.files.map(file => ({
+        url: file.path,
+        public_id: file.filename,
+        resource_type: file.mimetype.startsWith('video/') ? 'video' : 'image',
+      }));
+    }
+
+    await blog.save();
+    res.status(200).json(blog);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Delete a blog
+exports.deleteBlog = async (req, res) => {
+  try {
+    const blog = await Blog.findOne({ slug: req.params.slug });
+
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+
+    // Delete media from Cloudinary
+    if (blog.media && blog.media.length > 0) {
+      for (const item of blog.media) {
+        await cloudinary.uploader.destroy(item.public_id);
+      }
+    }
+
+    await blog.deleteOne();
+    res.status(200).json({ message: 'Blog deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

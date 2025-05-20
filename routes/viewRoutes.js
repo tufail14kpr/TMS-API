@@ -2,13 +2,16 @@ const express = require('express');
 const router = express.Router();
 const viewController = require('../controllers/viewController');
 
-// Debug: Log the viewController to check its contents
-console.log('viewController:', viewController);
-
-// Route to render the homepage
+// Homepage
 router.get('/home', viewController.renderHome);
 
-// Route to render a single blog page
+// Blog detail page
 router.get('/blogs/:slug', viewController.renderBlog);
+
+// Create blog page
+router.get('/create', viewController.renderCreate);
+
+// Handle create blog form submission
+router.post('/create', viewController.createBlog);
 
 module.exports = router;

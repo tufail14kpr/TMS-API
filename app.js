@@ -29,6 +29,9 @@ app.use(express.urlencoded({ extended: true }));
 // Serve Swagger UI at /api-docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+// Serve static files
+app.use(express.static('public'));
+
 // Connect to MongoDB
 mongoose.connect(
   process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/tmsdb',

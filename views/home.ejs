@@ -4,127 +4,64 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TMS Blog - Home</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f4f4f4;
-    }
-    /* Navbar Styles */
-    .navbar {
-      background-color: #333;
-      padding: 1rem;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .navbar ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-    }
-    .navbar li {
-      margin: 0 1rem;
-    }
-    .navbar a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .navbar a:hover {
-      color: #ddd;
-    }
-    /* Blog List Styles */
-    .container {
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .blog-card {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      margin-bottom: 1.5rem;
-      padding: 1.5rem;
-    }
-    .blog-card h2 {
-      margin-top: 0;
-      color: #333;
-    }
-    .blog-card .meta {
-      color: #777;
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
-    .blog-card p {
-      color: #555;
-      line-height: 1.6;
-    }
-    .blog-card .media {
-      margin-top: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .blog-card img, .blog-card video {
-      max-width: 200px;
-      border-radius: 5px;
-    }
-    .no-blogs {
-      text-align: center;
-      color: #777;
-      font-size: 1.2rem;
-      margin-top: 2rem;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/output.css">
 </head>
-<body>
+<body class="font-sans bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
   <!-- Navbar -->
-  <nav class="navbar">
-    <ul>
-      <li><a href="/home">Home</a></li>
-      <li><a href="/create">Create Blog</a></li>
-      <li><a href="/api-docs">API Docs</a></li>
-    </ul>
+  <nav class="bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex-shrink-0">
+          <a href="/home" class="text-2xl font-bold text-white tracking-tight">TMS Blog</a>
+        </div>
+        <div class="flex space-x-2 sm:space-x-4">
+          <a href="/home" class="text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Home</a>
+          <a href="/create" class="text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Create Blog</a>
+          <a href="/api-docs" class="text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">API Docs</a>
+        </div>
+      </div>
+    </div>
   </nav>
 
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight">Welcome to TMS Blog</h1>
+      <p class="mt-4 text-lg sm:text-xl opacity-90">Explore insightful stories, tutorials, and more from our community.</p>
+    </div>
+  </div>
+
   <!-- Blog List -->
-  <div class="container">
-    <h1>TMS Blog</h1>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <% if (blogs && blogs.length > 0) { %>
-      <% blogs.forEach(blog => { %>
-        <div class="blog-card">
-          <h2><%= blog.title %></h2>
-          <div class="meta">
-            <span>By <%= blog.author || 'Anonymous' %></span> | 
-            <span><%= new Date(blog.createdAt).toLocaleDateString() %></span>
-          </div>
-          <p>
-            <% if (blog.content.length > 200) { %>
-              <%= blog.content.substring(0, 200) %>...
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% blogs.forEach(blog => { %>
+          <div class="bg-white rounded-xl shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
+            <% if (blog.media && blog.media.length > 0 && blog.media[0].resource_type === 'image') { %>
+              <img src="<%= blog.media[0].url %>" alt="Blog Media" class="w-full h-48 sm:h-56 object-cover">
             <% } else { %>
-              <%= blog.content %>
+              <div class="w-full h-48 sm:h-56 bg-gray-200 flex items-center justify-center">
+                <span class="text-gray-500 text-sm">No Image Available</span>
+              </div>
             <% } %>
-            <a href="/blogs/<%= blog.slug %>">Read More</a>
-          </p>
-          <% if (blog.media && blog.media.length > 0) { %>
-            <div class="media">
-              <% blog.media.forEach(item => { %>
-                <% if (item.resource_type === 'image') { %>
-                  <img src="<%= item.url %>" alt="Blog Media">
-                <% } else if (item.resource_type === 'video') { %>
-                  <video controls src="<%= item.url %>" style="max-width: 200px;"></video>
-                <% } %>
-              <% }) %>
+            <div class="p-6">
+              <h2 class="text-xl font-semibold text-gray-800 mb-2 line-clamp-2"><%= blog.title %></h2>
+              <div class="text-gray-500 text-sm mb-4 flex items-center space-x-2">
+                <span>By <%= blog.author || 'Anonymous' %></span>
+                <span class="text-gray-300">•</span>
+                <span><%= new Date(blog.createdAt).toLocaleDateString() %></span>
+              </div>
+              <p class="text-gray-600 line-clamp-3 mb-4"><%= blog.content %></p>
+              <a href="/blogs/<%= blog.slug %>" class="inline-block text-indigo-600 font-medium hover:text-indigo-800 transition-colors duration-200">Read More →</a>
             </div>
-          <% } %>
-        </div>
-      <% }) %>
+          </div>
+        <% }) %>
+      </div>
     <% } else { %>
-      <p class="no-blogs">No blogs found. Be the first to create one!</p>
+      <div class="text-center py-12">
+        <p class="text-gray-600 text-lg sm:text-xl mb-6">No blogs found. Be the first to create one!</p>
+        <a href="/create" class="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-200">Create a Blog</a>
+      </div>
     <% } %>
   </div>
 </body>
